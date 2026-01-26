@@ -1,106 +1,141 @@
-# Express Typescript PostgreSQL Starter
+# OrderEats Server
 
-A robust starter template for building REST APIs using Express.js, PostgreSQL, Prisma ORM, and TypeScript.
+A robust and scalable backend for the OrderEats food delivery platform. This server application manages users, providers, meals, orders, and reviews, providing a seamless experience for customers, food providers, and administrators.
 
-## Features
+## 🚀 Tech Stack
 
-- 🚀 Express.js with TypeScript
-- 📦 PostgreSQL database with Prisma ORM
-- ⚡ Rate Limiting
-- 🌐 CORS enabled
-- 🔄 Request Validation using Zod
-- 🎯 Error Handling
-- 🔒 Environment Variables Support
+*   **Runtime:** Node.js
+*   **Framework:** Express.js
+*   **Database:** PostgreSQL
+*   **ORM:** Prisma
+*   **Language:** TypeScript
+*   **Authentication:** JWT (JSON Web Tokens)
 
-## Prerequisites
+## 🛠️ Prerequisites
 
-- Node.js (v14 or higher)
-- PostgreSQL
-- npm/yarn
+Before getting started, ensure you have the following installed:
 
-## Getting Started
+*   [Node.js](https://nodejs.org/) (v16 or higher)
+*   [PostgreSQL](https://www.postgresql.org/)
+*   [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
 
-1. Clone the repository:
+## 📦 Installation & Setup
 
-```sh
-git clone <repository-url>
-cd express-typescript-postgresql-starter
-```
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/ordereeats_server.git
+    cd ordereeats_server
+    ```
 
-2. Install dependencies:
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-```sh
-npm install
-```
+3.  **Environment Configuration:**
+    Create a `.env` file in the root directory and configure the following variables:
+    ```env
+    PORT=5000
+    DATABASE_URL="postgresql://user:password@localhost:5432/ordereeats_db?schema=public"
+    JWT_SECRET="your_jwt_secret"
+    JWT_EXPIRES_IN="30d"
+    ```
 
-3. Configure environment variables:
+4.  **Database Setup:**
+    Run the Prisma migrations to set up your database schema:
+    ```bash
+    npx prisma migrate dev --name init
+    ```
 
-```sh
-cp  .env
-```
+5.  **Run the Server:**
+    *   **Development Mode:**
+        ```bash
+        npm run dev
+        ```
+    *   **Production Build:**
+        ```bash
+        npm run build
+        npm start
+        ```
 
-Fill in the `.env` file with your configuration:
+## 📡 API Endpoints
 
-- `NODE_ENV`: development or production
-- `DATABASE_URL`: Your PostgreSQL connection string
-- `PORT`: Server port (default: 5000)
-- `JWT_SECRET`: Secret key for JWT tokens
-- Other JWT configuration variables
+Base URL: `/api/v1`
 
-4. Run database migrations:
+### 🔐 Authentication
 
-```sh
-npx prisma migrate dev
-```
+| Method | Endpoint      | Description           | Access Control |
+| :----- | :------------ | :-------------------- | :------------- |
+| POST   | `/auth/register` | Register a new user   | Public         |
+| POST   | `/auth/login`    | Login user & get token| Public         |
 
-5. Start development server:
+### 👤 Users
 
-```sh
-npm run dev
-```
+| Method | Endpoint          | Description         | Access Control |
+| :----- | :---------------- | :------------------ | :------------- |
+| GET    | `/users`          | Get all users       | Admin          |
+| PATCH  | `/users/:id/role` | Update user role    | Admin          |
 
-## Available Scripts
+### 🏪 Providers
 
-- `npm run dev` - Start development server with hot-reload
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run start:prod` - Run the built production server
+| Method | Endpoint        | Description               | Access Control     |
+| :----- | :-------------- | :------------------------ | :----------------- |
+| POST   | `/providers`    | Create provider profile   | Provider, Admin    |
+| GET    | `/providers`    | Get all providers         | Public             |
+| GET    | `/providers/:id`| Get provider details      | Public             |
 
-## API Routes
+### 📂 Categories
 
-- Auth Routes (`/api/v1/auth`)
-  - POST `/login` - User login
+| Method | Endpoint      | Description           | Access Control |
+| :----- | :------------ | :-------------------- | :------------- |
+| POST   | `/categories` | Create new category   | Admin          |
+| GET    | `/categories` | Get all categories    | Public         |
 
-## Project Structure
+### 🍱 Meals
 
-```
+| Method | Endpoint       | Description             | Access Control     |
+| :----- | :------------- | :---------------------- | :----------------- |
+| POST   | `/meals`       | Add a new meal          | Provider, Admin    |
+| GET    | `/meals`       | Get all meals           | Public             |
+| GET    | `/meals/:id`   | Get meal details        | Public             |
+| PATCH  | `/meals/:id`   | Update meal details     | Provider, Admin    |
+| DELETE | `/meals/:id`   | Delete a meal           | Provider, Admin    |
+
+### 🛍️ Orders
+
+| Method | Endpoint           | Description             | Access Control              |
+| :----- | :----------------- | :---------------------- | :-------------------------- |
+| POST   | `/orders`          | Place a new order       | Customer                    |
+| GET    | `/orders`          | Get all orders          | Customer, Provider, Admin   |
+| GET    | `/orders/:id`      | Get specific order      | Customer, Provider, Admin   |
+| PATCH  | `/orders/:id/status`| Update order status    | Provider, Admin             |
+
+### ⭐ Reviews
+
+| Method | Endpoint    | Description          | Access Control |
+| :----- | :---------- | :------------------- | :------------- |
+| POST   | `/reviews`  | Create a review      | Customer       |
+
+## 📁 Project Structure
+
+```bash
 src/
-  ├── app/
-  │   ├── errors/
-  │   ├── middleware/
-  │   ├── modules/
-  │   ├── routes/
-  │   └── shared/
-  ├── config/
-  ├── helpers/
-  ├── app.ts
-  └── server.ts
+├── app/
+│   ├── modules/       # Encapsulated modules (Controller, Service, Routes)
+│   ├── middleware/    # Auth and error handling middlewares
+│   ├── routes/        # Main application routes
+│   └── ...
+├── server.ts          # Entry point
+└── ...
 ```
 
-## Error Handling
+## 🤝 Contributing
 
-The application includes a global error handler and custom `ApiError` class for consistent error responses.
+1.  Fork the repository
+2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
 
-## Database
-
-- PostgreSQL with Prisma ORM
-- Structured database schema
-- Efficient query handling
-
-## Deployment
-
-The project includes Vercel deployment configuration in `vercel.json`.
-
-## License
-
-[MIT License](LICENSE)
+---
+Developed by Emtiaz Ahmed
