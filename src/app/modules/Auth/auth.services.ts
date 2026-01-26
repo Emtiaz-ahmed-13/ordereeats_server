@@ -1,15 +1,29 @@
+import { User } from "@prisma/client";
+import bcrypt from "bcrypt";
 import { Secret } from "jsonwebtoken";
 import config from "../../../config";
 import { jwtHelpers } from "../../../helpers/jwtHelpers";
 import { findUserByEmail } from "../../../helpers/userHelpers";
 import ApiError from "../../errors/ApiError";
 import prisma from "../../shared/prisma";
-import bcrypt from "bcrypt";
 
 type TLogin = {
   email: string;
   password: string;
 };
+
+const register = async (payload: User) => {
+  const hashedPassword = await bcrypt.hash(payload.password, 12);
+  const result = await prisma.user.create({
+    data: {
+      ...payload,
+      password: hashedPassword
+    }
+  });
+
+  const { password: _, ...userWithoutPassword } = result;
+  return userWithoutPassword;
+}
 
 const login = async (payload: TLogin) => {
   // find user
@@ -47,4 +61,5 @@ const login = async (payload: TLogin) => {
 
 export const AuthServices = {
   login,
+  register
 };
