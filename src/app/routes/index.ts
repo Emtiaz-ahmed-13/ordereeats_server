@@ -1,8 +1,11 @@
 import express from "express";
 import { AuthRoutes } from "../modules/Auth/auth.routes";
+import { cartRoutes } from "../modules/Cart/cart.routes";
 import { CategoryRoutes } from "../modules/Categories/categories.routes";
+import { loyaltyRoutes } from "../modules/Loyalty/loyalty.routes";
 import { MealRoutes } from "../modules/Meals/meals.routes";
 import { OrderRoutes } from "../modules/Orders/orders.routes";
+import { promoCodeRoutes } from "../modules/PromoCodes/promoCodes.routes";
 import { ProviderRoutes } from "../modules/Providers/providers.routes";
 import { ReviewRoutes } from "../modules/Reviews/reviews.routes";
 import { UserRoutes } from "../modules/Users/users.routes";
@@ -37,6 +40,18 @@ const moduleRoutes = [
   {
     path: "/reviews",
     route: ReviewRoutes,
+  },
+  {
+    path: "/cart",
+    route: cartRoutes,
+  },
+  {
+    path: "/promo-codes",
+    route: promoCodeRoutes,
+  },
+  {
+    path: "/loyalty",
+    route: loyaltyRoutes,
   },
 ];
 
