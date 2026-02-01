@@ -4,8 +4,12 @@ import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { ProviderService } from "./providers.service";
 
-const createProviderProfile = catchAsync(async (req: Request, res: Response) => {
-    const result = await ProviderService.createProviderProfileInDB(req.body);
+const createProviderProfile = catchAsync(async (req: Request & { user?: any }, res: Response) => {
+    const { id } = req.user;
+    const result = await ProviderService.createProviderProfileInDB({
+        ...req.body,
+        userId: id
+    });
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
         success: true,
