@@ -39,8 +39,44 @@ const getProviderById = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getMyProfile = catchAsync(async (req: Request & { user?: any }, res: Response) => {
+    const { id } = req.user;
+    const result = await ProviderService.getProviderByUserIdFromDB(id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Profile retrieved successfully",
+        data: result,
+    });
+});
+
+const updateMyProfile = catchAsync(async (req: Request & { user?: any }, res: Response) => {
+    const { id } = req.user;
+    const result = await ProviderService.updateProviderProfileInDB(id, req.body);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Profile updated successfully (Review in progress)",
+        data: result,
+    });
+});
+
+const getDashboardStats = catchAsync(async (req: Request & { user?: any }, res: Response) => {
+    const { id } = req.user;
+    const result = await ProviderService.getProviderDashboardStatsFromDB(id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Dashboard stats retrieved successfully",
+        data: result,
+    });
+});
+
 export const ProviderController = {
     createProviderProfile,
     getAllProviders,
     getProviderById,
+    getMyProfile,
+    updateMyProfile,
+    getDashboardStats,
 };

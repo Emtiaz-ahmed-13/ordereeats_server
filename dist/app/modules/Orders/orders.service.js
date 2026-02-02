@@ -24,6 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderService = void 0;
+const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const prisma_1 = __importDefault(require("../../shared/prisma"));
 const createOrderInDB = (data) => __awaiter(void 0, void 0, void 0, function* () {
     const { items } = data, orderData = __rest(data, ["items"]);
@@ -40,6 +41,9 @@ const createOrderInDB = (data) => __awaiter(void 0, void 0, void 0, function* ()
 const getAllOrdersFromDB = (userId, role) => __awaiter(void 0, void 0, void 0, function* () {
     let whereCondition = {};
     if (role === 'CUSTOMER') {
+        if (!userId) {
+            throw new ApiError_1.default(401, "User ID is required");
+        }
         whereCondition.userId = userId;
     }
     else if (role === 'PROVIDER') {

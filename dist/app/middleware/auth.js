@@ -12,9 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ApiError_1 = __importDefault(require("../errors/ApiError"));
-const jwtHelpers_1 = require("../../helpers/jwtHelpers");
 const config_1 = __importDefault(require("../../config"));
+const jwtHelpers_1 = require("../../helpers/jwtHelpers");
+const ApiError_1 = __importDefault(require("../errors/ApiError"));
 const auth = (...roles) => {
     return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
@@ -27,6 +27,12 @@ const auth = (...roles) => {
                 throw new ApiError_1.default(401, "Invalid token format");
             }
             const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(tokenWithoutBearer, config_1.default.jwt.jwt_secret);
+            // Normalize user ID consistency (centralized handling for different token versions)
+            const userId = verifiedUser.id || verifiedUser.userId || verifiedUser.sub || verifiedUser._id;
+            if (userId) {
+                verifiedUser.id = userId;
+                verifiedUser.userId = userId;
+            }
             req.user = verifiedUser;
             if (roles.length && !roles.includes(verifiedUser.role))
                 throw new ApiError_1.default(403, "Forbidden");

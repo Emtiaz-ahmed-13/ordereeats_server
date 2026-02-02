@@ -2,6 +2,10 @@ import ApiError from "../../errors/ApiError";
 import prisma from "../../shared/prisma";
 
 const getLoyaltyPoints = async (userId: string) => {
+    if (!userId) {
+        throw new ApiError(401, "User ID is required");
+    }
+
     const result = await prisma.loyaltyPoints.findUnique({
         where: { userId },
         include: {
@@ -14,7 +18,10 @@ const getLoyaltyPoints = async (userId: string) => {
     if (!result) {
         // Create if not exists (auto-initialize)
         return await prisma.loyaltyPoints.create({
-            data: { userId }
+            data: { userId },
+            include: {
+                history: true
+            }
         });
     }
 

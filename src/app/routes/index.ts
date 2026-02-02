@@ -1,4 +1,5 @@
 import express from "express";
+import { AdminRoutes } from "../modules/Admin/admin.routes";
 import { AuthRoutes } from "../modules/Auth/auth.routes";
 import { cartRoutes } from "../modules/Cart/cart.routes";
 import { CategoryRoutes } from "../modules/Categories/categories.routes";
@@ -19,7 +20,11 @@ const moduleRoutes = [
     route: AuthRoutes,
   },
   {
-    path: "/users", // Admin only usually
+    path: "/admin",
+    route: AdminRoutes,
+  },
+  {
+    path: "/users",
     route: UserRoutes,
   },
   {

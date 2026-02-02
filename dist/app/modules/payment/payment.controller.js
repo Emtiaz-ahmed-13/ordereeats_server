@@ -17,7 +17,7 @@ const http_status_1 = __importDefault(require("http-status"));
 const payment_service_1 = require("./payment.service");
 const createPaymentIntent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { amount, currency } = req.body; // Expecting amount in cents/smallest unit
+        const { amount, currency } = req.body;
         if (!amount) {
             res.status(http_status_1.default.BAD_REQUEST).json({
                 success: false,

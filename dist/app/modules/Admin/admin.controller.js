@@ -12,33 +12,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LoyaltyController = void 0;
+exports.AdminController = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const catchAsync_1 = __importDefault(require("../../shared/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../shared/sendResponse"));
-const loyalty_service_1 = require("./loyalty.service");
-const getMyLoyaltyInfo = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const userId = req.user.id;
-    const result = yield loyalty_service_1.LoyaltyService.getLoyaltyPoints(userId);
+const admin_service_1 = require("./admin.service");
+const getPendingProviders = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield admin_service_1.AdminService.getPendingProvidersFromDB();
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: "Loyalty information retrieved successfully",
+        message: "Pending providers retrieved successfully",
         data: result,
     });
 }));
-const redeemPoints = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.user;
-    const { points } = req.body;
-    const result = yield loyalty_service_1.LoyaltyService.redeemPoints(id, points);
+const updateProviderStatus = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { status } = req.body;
+    const result = yield admin_service_1.AdminService.updateProviderStatusInDB(id, status);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: "Points redeemed successfully",
+        message: `Provider status updated to ${status}`,
         data: result,
     });
 }));
-exports.LoyaltyController = {
-    getMyLoyaltyInfo,
-    redeemPoints
+exports.AdminController = {
+    getPendingProviders,
+    updateProviderStatus,
 };

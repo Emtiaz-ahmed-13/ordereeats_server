@@ -16,6 +16,9 @@ exports.LoyaltyService = void 0;
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const prisma_1 = __importDefault(require("../../shared/prisma"));
 const getLoyaltyPoints = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!userId) {
+        throw new ApiError_1.default(401, "User ID is required");
+    }
     const result = yield prisma_1.default.loyaltyPoints.findUnique({
         where: { userId },
         include: {
@@ -27,7 +30,10 @@ const getLoyaltyPoints = (userId) => __awaiter(void 0, void 0, void 0, function*
     if (!result) {
         // Create if not exists (auto-initialize)
         return yield prisma_1.default.loyaltyPoints.create({
-            data: { userId }
+            data: { userId },
+            include: {
+                history: true
+            }
         });
     }
     return result;

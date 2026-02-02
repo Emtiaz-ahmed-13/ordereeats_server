@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User, UserRole } from "@prisma/client";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { Secret } from "jsonwebtoken";
@@ -24,18 +24,53 @@ const register = async (payload: User) => {
     throw new ApiError(400, "User with this email already exists");
   }
 
+  // Limit ADMIN accounts to 2
+  if (payload.role === UserRole.ADMIN) {
+    const adminCount = await prisma.user.count({
+      where: { role: UserRole.ADMIN },
+    });
+    if (adminCount >= 2) {
+      throw new ApiError(400, "Maximum number of admin accounts (2) reached");
+    }
+  }
+
   const hashedPassword = await bcrypt.hash(payload.password, 12);
 
   // Generate email verification token
   const emailVerificationToken = crypto.randomBytes(32).toString("hex");
 
-  const result = await prisma.user.create({
-    data: {
-      ...payload,
-      password: hashedPassword,
-      emailVerificationToken,
-      isEmailVerified: false,
-    },
+  const result = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        ...payload,
+        password: hashedPassword,
+        emailVerificationToken,
+        isEmailVerified: false,
+      },
+    });
+
+    if (user.role === UserRole.PROVIDER) {
+      await tx.providerProfile.create({
+        data: {
+          userId: user.id,
+          restaurantName: "Pending Setup",
+          cuisine: "Not specified",
+          deliveryFee: 0,
+          deliveryTime: "Pending",
+          isOnboarded: false,
+        },
+      });
+    }
+
+    if (user.role === UserRole.CUSTOMER) {
+      await tx.loyaltyPoints.create({
+        data: {
+          userId: user.id,
+        },
+      });
+    }
+
+    return user;
   });
 
   // Send verification email
@@ -61,13 +96,23 @@ const login = async (payload: TLogin) => {
   const { password: _, ...userWithoutPassword } = user;
 
   const accessToken = jwtHelpers.generateToken(
-    userWithoutPassword,
+    {
+      id: userWithoutPassword.id,
+      userId: userWithoutPassword.id,
+      email: userWithoutPassword.email,
+      role: userWithoutPassword.role,
+      name: userWithoutPassword.name,
+    },
     config.jwt.jwt_secret as Secret,
     config.jwt.expires_in as string
   );
 
   const refreshToken = jwtHelpers.generateToken(
-    userWithoutPassword,
+    {
+      id: userWithoutPassword.id,
+      userId: userWithoutPassword.id,
+      role: userWithoutPassword.role,
+    },
     config.jwt.refresh_token_secret as Secret,
     config.jwt.refresh_token_expires_in as string
   );
@@ -108,7 +153,13 @@ const refreshAccessToken = async (refreshToken: string) => {
 
   // Generate new access token
   const newAccessToken = jwtHelpers.generateToken(
-    userWithoutPassword,
+    {
+      id: userWithoutPassword.id,
+      userId: userWithoutPassword.id,
+      email: userWithoutPassword.email,
+      role: userWithoutPassword.role,
+      name: userWithoutPassword.name,
+    },
     config.jwt.jwt_secret as Secret,
     config.jwt.expires_in as string
   );

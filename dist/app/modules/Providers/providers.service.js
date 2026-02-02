@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProviderService = void 0;
+const client_1 = require("@prisma/client");
 const prisma_1 = __importDefault(require("../../shared/prisma"));
 const createProviderProfileInDB = (data) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield prisma_1.default.providerProfile.create({
@@ -41,8 +42,91 @@ const getProviderByIdFromDB = (id) => __awaiter(void 0, void 0, void 0, function
     });
     return result;
 });
+const getProviderByUserIdFromDB = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.providerProfile.findUnique({
+        where: {
+            userId,
+        },
+        include: {
+            user: true,
+            meals: true,
+        },
+    });
+    return result;
+});
+const updateProviderProfileInDB = (userId, data) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.providerProfile.update({
+        where: {
+            userId,
+        },
+        data: Object.assign(Object.assign({}, data), { isOnboarded: true // Automatically mark as onboarded when updated
+         }),
+    });
+    return result;
+});
+const getProviderDashboardStatsFromDB = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const provider = yield prisma_1.default.providerProfile.findUnique({
+        where: { userId }
+    });
+    if (!provider) {
+        return {
+            totalRevenue: 0,
+            activeOrders: 0,
+            totalCustomers: 0,
+            avgRating: 0,
+            totalReviews: 0
+        };
+    }
+    const providerId = provider.id;
+    const [revenueData, activeOrdersCount, customersData, reviewsData] = yield Promise.all([
+        // Total Revenue
+        prisma_1.default.order.aggregate({
+            where: {
+                providerId,
+                status: client_1.OrderStatus.DELIVERED
+            },
+            _sum: {
+                totalAmount: true
+            }
+        }),
+        // Active Orders
+        prisma_1.default.order.count({
+            where: {
+                providerId,
+                status: {
+                    in: [client_1.OrderStatus.PENDING, client_1.OrderStatus.PREPARING, client_1.OrderStatus.READY]
+                }
+            }
+        }),
+        // Total Customers (distinct users)
+        prisma_1.default.order.groupBy({
+            by: ['userId'],
+            where: { providerId }
+        }),
+        // Avg Rating
+        prisma_1.default.review.aggregate({
+            where: { providerId },
+            _avg: {
+                overallRating: true
+            },
+            _count: {
+                overallRating: true
+            }
+        })
+    ]);
+    return {
+        totalRevenue: revenueData._sum.totalAmount || 0,
+        activeOrders: activeOrdersCount,
+        totalCustomers: customersData.length,
+        avgRating: reviewsData._avg.overallRating || 0,
+        totalReviews: reviewsData._count.overallRating
+    };
+});
 exports.ProviderService = {
     createProviderProfileInDB,
     getAllProvidersFromDB,
     getProviderByIdFromDB,
+    getProviderByUserIdFromDB,
+    updateProviderProfileInDB,
+    getProviderDashboardStatsFromDB,
 };
