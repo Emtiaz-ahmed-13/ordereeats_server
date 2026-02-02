@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../shared/prisma';
 
-const prisma = new PrismaClient();
+// Shared prisma instance imported
 
 const createPromoCode = async (data: {
     code: string;
@@ -13,7 +13,7 @@ const createPromoCode = async (data: {
     validFrom: Date;
     validUntil: Date;
 }) => {
-    // Check if code already exists
+
     const existing = await prisma.promoCode.findUnique({
         where: { code: data.code.toUpperCase() },
     });
@@ -22,7 +22,6 @@ const createPromoCode = async (data: {
         throw new Error('Promo code already exists');
     }
 
-    // Create promo code
     const promoCode = await prisma.promoCode.create({
         data: {
             ...data,
@@ -77,8 +76,6 @@ const validatePromoCode = async (code: string, orderAmount: number) => {
             `Minimum order amount of ৳${promoCode.minOrderAmount} required`
         );
     }
-
-    // Calculate discount
     let discount = 0;
     if (promoCode.discountType === 'PERCENTAGE') {
         discount = (orderAmount * promoCode.discountValue) / 100;
@@ -91,7 +88,7 @@ const validatePromoCode = async (code: string, orderAmount: number) => {
 
     return {
         promoCode,
-        discount: Math.min(discount, orderAmount), // Can't discount more than order amount
+        discount: Math.min(discount, orderAmount),
     };
 };
 

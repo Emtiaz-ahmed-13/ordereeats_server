@@ -5,6 +5,7 @@ import { CategoryRoutes } from "../modules/Categories/categories.routes";
 import { loyaltyRoutes } from "../modules/Loyalty/loyalty.routes";
 import { MealRoutes } from "../modules/Meals/meals.routes";
 import { OrderRoutes } from "../modules/Orders/orders.routes";
+import { PaymentRoutes } from "../modules/payment/payment.routes";
 import { promoCodeRoutes } from "../modules/PromoCodes/promoCodes.routes";
 import { ProviderRoutes } from "../modules/Providers/providers.routes";
 import { ReviewRoutes } from "../modules/Reviews/reviews.routes";
@@ -52,6 +53,10 @@ const moduleRoutes = [
   {
     path: "/loyalty",
     route: loyaltyRoutes,
+  },
+  {
+    path: "/payment",
+    route: PaymentRoutes,
   },
 ];
 
