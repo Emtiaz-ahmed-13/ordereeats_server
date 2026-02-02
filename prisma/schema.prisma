@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  engineType = "client"
 }
 
 datasource db {
@@ -20,6 +21,18 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum LoyaltyTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
 model User {
   id       String   @id @default(uuid())
   name     String
@@ -28,10 +41,20 @@ model User {
   role     UserRole @default(CUSTOMER)
   address  String?
   phone    String?
+  avatar   String?
+
+  // Enhanced Authentication
+  refreshToken           String?
+  isEmailVerified        Boolean   @default(false)
+  emailVerificationToken String?
+  passwordResetToken     String?
+  passwordResetExpires   DateTime?
 
   providerProfile ProviderProfile?
+  cart            Cart?
   orders          Order[]
   reviews         Review[]
+  loyaltyPoints   LoyaltyPoints?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -48,9 +71,10 @@ model ProviderProfile {
   deliveryFee    Float
   deliveryTime   String // e.g. "30-45 min"
 
-  user   User    @relation(fields: [userId], references: [id])
-  meals  Meal[]
-  orders Order[] // Orders received by this provider
+  user    User     @relation(fields: [userId], references: [id])
+  meals   Meal[]
+  orders  Order[] // Orders received by this provider
+  reviews Review[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -86,6 +110,7 @@ model Meal {
   provider   ProviderProfile @relation(fields: [providerId], references: [id])
 
   orderItems OrderItem[]
+  cartItems  CartItem[]
   reviews    Review[]
 
   createdAt DateTime @default(now())
@@ -102,10 +127,24 @@ model Order {
   status          OrderStatus @default(PENDING)
   deliveryAddress String?
 
+  // Delivery Tracking
+  deliveryPersonName  String?
+  deliveryPersonPhone String?
+  estimatedDelivery   DateTime?
+  actualDelivery      DateTime?
+
+  // Promo & Loyalty
+  promoCodeId    String?
+  discountAmount Float   @default(0)
+  pointsUsed     Int     @default(0)
+  pointsEarned   Int     @default(0)
+
   user     User            @relation(fields: [userId], references: [id])
   provider ProviderProfile @relation(fields: [providerId], references: [id])
 
-  items OrderItem[]
+  items           OrderItem[]
+  trackingHistory OrderTracking[]
+  reviews         Review[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -127,17 +166,116 @@ model OrderItem {
 }
 
 model Review {
-  id      String  @id @default(uuid())
-  userId  String
-  mealId  String
-  rating  Int
-  comment String?
+  id         String  @id @default(uuid())
+  userId     String
+  orderId    String?
+  mealId     String?
+  providerId String?
 
-  user User @relation(fields: [userId], references: [id])
-  meal Meal @relation(fields: [mealId], references: [id])
+  // Detailed ratings
+  foodRating     Int? // 1-5
+  deliveryRating Int? // 1-5
+  serviceRating  Int? // 1-5
+  overallRating  Int // 1-5
+
+  comment String?
+  images  String[] // Array of image URLs
+
+  providerResponse String?
+  isVerified       Boolean @default(false)
+
+  user     User             @relation(fields: [userId], references: [id])
+  meal     Meal?            @relation(fields: [mealId], references: [id])
+  provider ProviderProfile? @relation(fields: [providerId], references: [id])
+  order    Order?           @relation(fields: [orderId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("reviews")
+}
+
+// ========== Shopping Cart ==========
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("carts")
+}
+
+model CartItem {
+  id       String @id @default(uuid())
+  cartId   String
+  mealId   String
+  quantity Int    @default(1)
+  cart     Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  meal     Meal   @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, mealId])
+  @@map("cart_items")
+}
+
+// ========== Order Tracking ==========
+model OrderTracking {
+  id        String      @id @default(uuid())
+  orderId   String
+  status    OrderStatus
+  notes     String?
+  timestamp DateTime    @default(now())
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_tracking")
+}
+
+// ========== Promo Codes ==========
+model PromoCode {
+  id             String       @id @default(uuid())
+  code           String       @unique
+  description    String?
+  discountType   DiscountType
+  discountValue  Float
+  minOrderAmount Float?
+  maxDiscount    Float?
+  usageLimit     Int?
+  usedCount      Int          @default(0)
+  validFrom      DateTime
+  validUntil     DateTime
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("promo_codes")
+}
+
+// ========== Loyalty Program ==========
+model LoyaltyPoints {
+  id        String          @id @default(uuid())
+  userId    String          @unique
+  points    Int             @default(0)
+  tier      LoyaltyTier     @default(BRONZE)
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  history   PointsHistory[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@map("loyalty_points")
+}
+
+model PointsHistory {
+  id              String        @id @default(uuid())
+  loyaltyPointsId String
+  points          Int
+  type            String // EARNED, REDEEMED, EXPIRED
+  description     String
+  loyaltyPoints   LoyaltyPoints @relation(fields: [loyaltyPointsId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+
+  @@map("points_history")
 }
