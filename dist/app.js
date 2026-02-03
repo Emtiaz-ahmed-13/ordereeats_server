@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
+const path_1 = __importDefault(require("path"));
 const globalErrorHandler_1 = __importDefault(require("./app/middleware/globalErrorHandler"));
 const routes_1 = __importDefault(require("./app/routes"));
 const app = (0, express_1.default)();
@@ -15,6 +16,7 @@ app.use((0, cookie_parser_1.default)());
 //parser
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
+app.use("/uploads", express_1.default.static(path_1.default.join(process.cwd(), "uploads")));
 app.get("/", (req, res) => {
     res.send({
         Message: "ordereeats running successfully 🏃🏻‍♂️‍➡️",

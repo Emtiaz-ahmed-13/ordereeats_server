@@ -46,8 +46,41 @@ const getProviderById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
         data: result,
     });
 }));
+const getMyProfile = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.user;
+    const result = yield providers_service_1.ProviderService.getProviderByUserIdFromDB(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Profile retrieved successfully",
+        data: result,
+    });
+}));
+const updateMyProfile = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.user;
+    const result = yield providers_service_1.ProviderService.updateProviderProfileInDB(id, req.body);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Profile updated successfully (Review in progress)",
+        data: result,
+    });
+}));
+const getDashboardStats = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.user;
+    const result = yield providers_service_1.ProviderService.getProviderDashboardStatsFromDB(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Dashboard stats retrieved successfully",
+        data: result,
+    });
+}));
 exports.ProviderController = {
     createProviderProfile,
     getAllProviders,
     getProviderById,
+    getMyProfile,
+    updateMyProfile,
+    getDashboardStats,
 };

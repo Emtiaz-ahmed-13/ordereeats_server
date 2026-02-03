@@ -5,8 +5,8 @@ import sendResponse from "../../shared/sendResponse";
 import { LoyaltyService } from "./loyalty.service";
 
 const getMyLoyaltyInfo = catchAsync(async (req: Request & { user?: any }, res: Response) => {
-    const { id } = req.user;
-    const result = await LoyaltyService.getLoyaltyPoints(id);
+    const userId = req.user.id;
+    const result = await LoyaltyService.getLoyaltyPoints(userId);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,

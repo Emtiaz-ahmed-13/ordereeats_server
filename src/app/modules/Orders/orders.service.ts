@@ -1,4 +1,5 @@
 import { OrderStatus } from "@prisma/client";
+import ApiError from "../../errors/ApiError";
 import prisma from "../../shared/prisma";
 
 const createOrderInDB = async (data: any) => {
@@ -20,6 +21,9 @@ const createOrderInDB = async (data: any) => {
 const getAllOrdersFromDB = async (userId: string, role: string) => {
     let whereCondition: any = {};
     if (role === 'CUSTOMER') {
+        if (!userId) {
+            throw new ApiError(401, "User ID is required");
+        }
         whereCondition.userId = userId;
     } else if (role === 'PROVIDER') {
         const provider = await prisma.providerProfile.findUnique({

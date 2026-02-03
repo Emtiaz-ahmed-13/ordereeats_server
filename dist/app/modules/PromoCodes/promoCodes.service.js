@@ -16,14 +16,12 @@ exports.promoCodeService = void 0;
 const prisma_1 = __importDefault(require("../../shared/prisma"));
 // Shared prisma instance imported
 const createPromoCode = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    // Check if code already exists
     const existing = yield prisma_1.default.promoCode.findUnique({
         where: { code: data.code.toUpperCase() },
     });
     if (existing) {
         throw new Error('Promo code already exists');
     }
-    // Create promo code
     const promoCode = yield prisma_1.default.promoCode.create({
         data: Object.assign(Object.assign({}, data), { code: data.code.toUpperCase() }),
     });
@@ -64,7 +62,6 @@ const validatePromoCode = (code, orderAmount) => __awaiter(void 0, void 0, void 
     if (promoCode.minOrderAmount && orderAmount < promoCode.minOrderAmount) {
         throw new Error(`Minimum order amount of ৳${promoCode.minOrderAmount} required`);
     }
-    // Calculate discount
     let discount = 0;
     if (promoCode.discountType === 'PERCENTAGE') {
         discount = (orderAmount * promoCode.discountValue) / 100;
@@ -77,7 +74,7 @@ const validatePromoCode = (code, orderAmount) => __awaiter(void 0, void 0, void 
     }
     return {
         promoCode,
-        discount: Math.min(discount, orderAmount), // Can't discount more than order amount
+        discount: Math.min(discount, orderAmount),
     };
 });
 const incrementPromoCodeUsage = (promoCodeId) => __awaiter(void 0, void 0, void 0, function* () {

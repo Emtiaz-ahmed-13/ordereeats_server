@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const admin_routes_1 = require("../modules/Admin/admin.routes");
 const auth_routes_1 = require("../modules/Auth/auth.routes");
 const cart_routes_1 = require("../modules/Cart/cart.routes");
 const categories_routes_1 = require("../modules/Categories/categories.routes");
@@ -22,7 +23,11 @@ const moduleRoutes = [
         route: auth_routes_1.AuthRoutes,
     },
     {
-        path: "/users", // Admin only usually
+        path: "/admin",
+        route: admin_routes_1.AdminRoutes,
+    },
+    {
+        path: "/users",
         route: users_routes_1.UserRoutes,
     },
     {

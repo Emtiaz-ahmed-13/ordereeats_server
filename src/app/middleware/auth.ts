@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import ApiError from "../errors/ApiError";
-import { jwtHelpers } from "../../helpers/jwtHelpers";
-import config from "../../config";
 import { Secret } from "jsonwebtoken";
+import config from "../../config";
+import { jwtHelpers } from "../../helpers/jwtHelpers";
+import ApiError from "../errors/ApiError";
 
 const auth = (...roles: string[]) => {
   return async (
@@ -25,15 +25,38 @@ const auth = (...roles: string[]) => {
       const verifiedUser = jwtHelpers.verifyToken(
         tokenWithoutBearer,
         config.jwt.jwt_secret as Secret
-      );
+      ) as any;
+
+      // Normalize user ID consistency (centralized handling for different token versions)
+      const userId = verifiedUser.id || verifiedUser.userId || verifiedUser.sub || verifiedUser._id;
+      if (userId) {
+        verifiedUser.id = userId;
+        verifiedUser.userId = userId;
+      }
 
       req.user = verifiedUser;
 
-      if (roles.length && !roles.includes(verifiedUser.role))
-        throw new ApiError(403, "Forbidden");
+      const userRoleSource = verifiedUser.role;
+      const userRole = userRoleSource?.toUpperCase();
+      const requiredRoles = roles.map(r => r.toUpperCase());
+
+      console.log('Auth Middleware Trace:', {
+        userId: verifiedUser.id,
+        originalRole: userRoleSource,
+        userRole,
+        requiredRoles
+      });
+
+      if (requiredRoles.length && !requiredRoles.includes(userRole)) {
+        throw new ApiError(
+          403,
+          `Forbidden: User role '${userRoleSource}' is not authorized for this resource. Required roles: ${roles.join(', ')}`
+        );
+      }
 
       next();
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Auth Middleware Error:', error.message);
       next(error);
     }
   };

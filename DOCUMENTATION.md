@@ -10,26 +10,26 @@ The system manages the entire lifecycle of food delivery—from user authenticat
 
 ### 🎯 Project Objectives
 
-| Objective | Description |
-|:----------|:------------|
-| **Digital Bridge** | Connecting local food providers with hungry customers efficiently |
-| **Streamlined Ordering** | A frictionless cart and checkout experience |
-| **Provider Empowerment** | Tools for restaurants to manage meals, prices, and order statuses |
+| Objective                  | Description                                                                     |
+| :------------------------- | :------------------------------------------------------------------------------ |
+| **Digital Bridge**         | Connecting local food providers with hungry customers efficiently               |
+| **Streamlined Ordering**   | A frictionless cart and checkout experience                                     |
+| **Provider Empowerment**   | Tools for restaurants to manage meals, prices, and order statuses               |
 | **Administrative Control** | Comprehensive dashboard for managing users, promo codes, and platform analytics |
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology | Purpose |
-|:------|:-----------|:--------|
-| **Runtime** | Node.js | High-performance JavaScript runtime |
-| **Framework** | Express.js (Modular Pattern) | Lightweight, flexible web framework |
-| **Language** | TypeScript | Type-safe development with enhanced IDE support |
-| **Database** | PostgreSQL | Robust relational database with ACID compliance |
-| **ORM** | Prisma | Type-safe database client with auto-completion |
-| **Authentication** | JWT (Access & Refresh Token Strategy) | Secure stateless authentication |
-| **Email Service** | Nodemailer | Transactional email delivery |
+| Layer              | Technology                            | Purpose                                         |
+| :----------------- | :------------------------------------ | :---------------------------------------------- |
+| **Runtime**        | Node.js                               | High-performance JavaScript runtime             |
+| **Framework**      | Express.js (Modular Pattern)          | Lightweight, flexible web framework             |
+| **Language**       | TypeScript                            | Type-safe development with enhanced IDE support |
+| **Database**       | PostgreSQL                            | Robust relational database with ACID compliance |
+| **ORM**            | Prisma                                | Type-safe database client with auto-completion  |
+| **Authentication** | JWT (Access & Refresh Token Strategy) | Secure stateless authentication                 |
+| **Email Service**  | Nodemailer                            | Transactional email delivery                    |
 
 ---
 
@@ -82,15 +82,15 @@ The server follows a **Modular MVC Architecture** to ensure maintainability and 
 
 ### 🔐 Functional Requirements
 
-| Feature | Description | Implementation |
-|:--------|:------------|:---------------|
-| **Role-Based Access Control (RBAC)** | Dedicated permissions for Customer, Provider, and Admin | JWT-based middleware with role verification |
-| **Meal Management** | Full CRUD operations for providers to manage their digital menu | RESTful API with image upload support |
-| **Advanced Cart System** | Persistent shopping cart with real-time total calculations | User-specific cart with item quantity management |
-| **Secure Checkout** | Integrated order placement with delivery tracking | Transaction-safe order creation with status updates |
-| **Promo System** | Dynamic discount management with validity checks and usage limits | Time-based validation with usage tracking |
-| **Email Notifications** | Automated emails for verification, password reset, and order updates | Nodemailer integration with HTML templates |
-| **Authentication Flow** | Complete auth system with email verification | Access/Refresh token strategy with secure password hashing |
+| Feature                              | Description                                                          | Implementation                                             |
+| :----------------------------------- | :------------------------------------------------------------------- | :--------------------------------------------------------- |
+| **Role-Based Access Control (RBAC)** | Dedicated permissions for Customer, Provider, and Admin              | JWT-based middleware with role verification                |
+| **Meal Management**                  | Full CRUD operations for providers to manage their digital menu      | RESTful API with image upload support                      |
+| **Advanced Cart System**             | Persistent shopping cart with real-time total calculations           | User-specific cart with item quantity management           |
+| **Secure Checkout**                  | Integrated order placement with delivery tracking                    | Transaction-safe order creation with status updates        |
+| **Promo System**                     | Dynamic discount management with validity checks and usage limits    | Time-based validation with usage tracking                  |
+| **Email Notifications**              | Automated emails for verification, password reset, and order updates | Nodemailer integration with HTML templates                 |
+| **Authentication Flow**              | Complete auth system with email verification                         | Access/Refresh token strategy with secure password hashing |
 
 ---
 
@@ -147,7 +147,7 @@ erDiagram
     Order ||--|{ OrderItem : contains
     Cart ||--|{ CartItem : contains
     PromoCode }o--o{ Order : applied_to
-    
+
     User {
         string id PK
         string name
@@ -157,7 +157,7 @@ erDiagram
         boolean isEmailVerified
         datetime createdAt
     }
-    
+
     Provider {
         string id PK
         string name
@@ -167,13 +167,13 @@ erDiagram
         string image
         string userId FK
     }
-    
+
     Category {
         string id PK
         string name UK
         string description
     }
-    
+
     Meal {
         string id PK
         string name
@@ -184,21 +184,21 @@ erDiagram
         string categoryId FK
         string providerId FK
     }
-    
+
     Cart {
         string id PK
         string userId FK
         datetime createdAt
         datetime updatedAt
     }
-    
+
     CartItem {
         string id PK
         int quantity
         string cartId FK
         string mealId FK
     }
-    
+
     Order {
         string id PK
         decimal totalAmount
@@ -208,7 +208,7 @@ erDiagram
         string promoCodeId FK
         datetime createdAt
     }
-    
+
     OrderItem {
         string id PK
         int quantity
@@ -216,7 +216,7 @@ erDiagram
         string orderId FK
         string mealId FK
     }
-    
+
     Review {
         string id PK
         int rating
@@ -225,7 +225,7 @@ erDiagram
         string mealId FK
         datetime createdAt
     }
-    
+
     PromoCode {
         string id PK
         string code UK
@@ -298,16 +298,16 @@ erDiagram
 
 ### HTTP Status Codes
 
-| Code | Meaning | Usage |
-|:-----|:--------|:------|
-| **200** | OK | Successful GET, PATCH, DELETE |
-| **201** | Created | Successful POST (resource created) |
-| **400** | Bad Request | Invalid input data |
-| **401** | Unauthorized | Missing or invalid authentication |
-| **403** | Forbidden | Valid auth but insufficient permissions |
-| **404** | Not Found | Resource doesn't exist |
-| **409** | Conflict | Duplicate resource (e.g., email exists) |
-| **500** | Internal Server Error | Unexpected server error |
+| Code    | Meaning               | Usage                                   |
+| :------ | :-------------------- | :-------------------------------------- |
+| **200** | OK                    | Successful GET, PATCH, DELETE           |
+| **201** | Created               | Successful POST (resource created)      |
+| **400** | Bad Request           | Invalid input data                      |
+| **401** | Unauthorized          | Missing or invalid authentication       |
+| **403** | Forbidden             | Valid auth but insufficient permissions |
+| **404** | Not Found             | Resource doesn't exist                  |
+| **409** | Conflict              | Duplicate resource (e.g., email exists) |
+| **500** | Internal Server Error | Unexpected server error                 |
 
 ---
 
@@ -321,29 +321,29 @@ sequenceDiagram
     participant API as API Server
     participant DB as Database
     participant P as Provider
-    
+
     C->>API: Browse Meals
     API->>DB: Query Meals
     DB-->>API: Return Meals
     API-->>C: Display Meals
-    
+
     C->>API: Add to Cart
     API->>DB: Update Cart
     DB-->>API: Cart Updated
     API-->>C: Cart Confirmation
-    
+
     C->>API: Apply Promo Code
     API->>DB: Validate Code
     DB-->>API: Discount Calculated
     API-->>C: Updated Total
-    
+
     C->>API: Place Order
     API->>DB: Create Order
     API->>DB: Clear Cart
     API->>P: Notify Provider
     DB-->>API: Order Created
     API-->>C: Order Confirmation
-    
+
     P->>API: Update Status
     API->>DB: Update Order
     API->>C: Status Notification
@@ -382,19 +382,19 @@ graph TD
 
 ```typescript
 // Files: kebab-case
-auth.routes.ts
-user.controller.ts
+auth.routes.ts;
+user.controller.ts;
 
 // Classes/Interfaces: PascalCase
-class ApiError extends Error { }
-interface IUserService { }
+class ApiError extends Error {}
+interface IUserService {}
 
 // Functions/Variables: camelCase
-const getUserById = () => { }
-let isAuthenticated = false
+const getUserById = () => {};
+let isAuthenticated = false;
 
 // Constants: UPPER_SNAKE_CASE
-const JWT_SECRET = process.env.JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET;
 ```
 
 ---

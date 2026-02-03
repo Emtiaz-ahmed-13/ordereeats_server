@@ -24,6 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthServices = void 0;
+const client_1 = require("@prisma/client");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const crypto_1 = __importDefault(require("crypto"));
 const config_1 = __importDefault(require("../../../config"));
@@ -43,9 +44,31 @@ const register = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const hashedPassword = yield bcrypt_1.default.hash(payload.password, 12);
     // Generate email verification token
     const emailVerificationToken = crypto_1.default.randomBytes(32).toString("hex");
-    const result = yield prisma_1.default.user.create({
-        data: Object.assign(Object.assign({}, payload), { password: hashedPassword, emailVerificationToken, isEmailVerified: false }),
-    });
+    const result = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        const user = yield tx.user.create({
+            data: Object.assign(Object.assign({}, payload), { password: hashedPassword, emailVerificationToken, isEmailVerified: false }),
+        });
+        if (user.role === client_1.UserRole.PROVIDER) {
+            yield tx.providerProfile.create({
+                data: {
+                    userId: user.id,
+                    restaurantName: "Pending Setup",
+                    cuisine: "Not specified",
+                    deliveryFee: 0,
+                    deliveryTime: "Pending",
+                    isOnboarded: false,
+                },
+            });
+        }
+        if (user.role === client_1.UserRole.CUSTOMER) {
+            yield tx.loyaltyPoints.create({
+                data: {
+                    userId: user.id,
+                },
+            });
+        }
+        return user;
+    }));
     // Send verification email
     yield email_service_1.emailService.sendVerificationEmail(result.email, result.name, emailVerificationToken);
     const { password: _, emailVerificationToken: __ } = result, userWithoutSensitive = __rest(result, ["password", "emailVerificationToken"]);
@@ -58,8 +81,18 @@ const login = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     if (!isPasswordValid)
         throw new ApiError_1.default(401, "Invalid Credentials.");
     const { password: _ } = user, userWithoutPassword = __rest(user, ["password"]);
-    const accessToken = jwtHelpers_1.jwtHelpers.generateToken(userWithoutPassword, config_1.default.jwt.jwt_secret, config_1.default.jwt.expires_in);
-    const refreshToken = jwtHelpers_1.jwtHelpers.generateToken(userWithoutPassword, config_1.default.jwt.refresh_token_secret, config_1.default.jwt.refresh_token_expires_in);
+    const accessToken = jwtHelpers_1.jwtHelpers.generateToken({
+        id: userWithoutPassword.id,
+        userId: userWithoutPassword.id,
+        email: userWithoutPassword.email,
+        role: userWithoutPassword.role,
+        name: userWithoutPassword.name,
+    }, config_1.default.jwt.jwt_secret, config_1.default.jwt.expires_in);
+    const refreshToken = jwtHelpers_1.jwtHelpers.generateToken({
+        id: userWithoutPassword.id,
+        userId: userWithoutPassword.id,
+        role: userWithoutPassword.role,
+    }, config_1.default.jwt.refresh_token_secret, config_1.default.jwt.refresh_token_expires_in);
     // Store refresh token in database
     yield prisma_1.default.user.update({
         where: { id: user.id },
@@ -86,7 +119,13 @@ const refreshAccessToken = (refreshToken) => __awaiter(void 0, void 0, void 0, f
     }
     const { password: _ } = user, userWithoutPassword = __rest(user, ["password"]);
     // Generate new access token
-    const newAccessToken = jwtHelpers_1.jwtHelpers.generateToken(userWithoutPassword, config_1.default.jwt.jwt_secret, config_1.default.jwt.expires_in);
+    const newAccessToken = jwtHelpers_1.jwtHelpers.generateToken({
+        id: userWithoutPassword.id,
+        userId: userWithoutPassword.id,
+        email: userWithoutPassword.email,
+        role: userWithoutPassword.role,
+        name: userWithoutPassword.name,
+    }, config_1.default.jwt.jwt_secret, config_1.default.jwt.expires_in);
     return { accessToken: newAccessToken };
 });
 const verifyEmail = (token) => __awaiter(void 0, void 0, void 0, function* () {

@@ -16,7 +16,7 @@ exports.PaymentService = void 0;
 const stripe_1 = __importDefault(require("stripe"));
 // Initialize Stripe with the secret key
 const stripe = new stripe_1.default(process.env.STRIPE_SECRET_KEY || '', {
-    apiVersion: '2026-01-28.clover',
+    apiVersion: '2025-01-27.acacia',
     typescript: true,
 });
 /**
