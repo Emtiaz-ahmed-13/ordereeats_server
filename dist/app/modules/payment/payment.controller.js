@@ -14,31 +14,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentController = void 0;
 const http_status_1 = __importDefault(require("http-status"));
+const catchAsync_1 = __importDefault(require("../../shared/catchAsync"));
+const sendResponse_1 = __importDefault(require("../../shared/sendResponse"));
 const payment_service_1 = require("./payment.service");
-const createPaymentIntent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { amount, currency } = req.body;
-        if (!amount) {
-            res.status(http_status_1.default.BAD_REQUEST).json({
-                success: false,
-                message: 'Amount is required',
-            });
-            return;
-        }
-        const intent = yield payment_service_1.PaymentService.createPaymentIntent(amount, currency);
-        res.status(http_status_1.default.OK).json({
-            success: true,
-            message: 'Payment intent created successfully',
-            data: intent,
-        });
-    }
-    catch (error) {
-        res.status(http_status_1.default.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: error.message || 'Failed to create payment intent',
-        });
-    }
-});
+const createPaymentIntent = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { amount, currency, metadata } = req.body;
+    const intent = yield payment_service_1.PaymentService.createPaymentIntent(amount, currency, metadata);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.CREATED,
+        success: true,
+        message: "Payment intent created successfully",
+        data: intent,
+    });
+}));
 exports.PaymentController = {
     createPaymentIntent,
 };
