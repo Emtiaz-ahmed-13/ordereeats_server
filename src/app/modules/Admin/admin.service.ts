@@ -271,7 +271,6 @@ const getPendingProvidersFromDB = async () => {
   const result = await prisma.providerProfile.findMany({
     where: {
       status: ProviderStatus.PENDING,
-      isOnboarded: true,
     },
     include: {
       user: true,
@@ -432,7 +431,7 @@ const getDashboardStatsFromDB = async () => {
       where: { status: ProviderStatus.APPROVED },
     }),
     prisma.providerProfile.count({
-      where: { status: ProviderStatus.PENDING, isOnboarded: true },
+      where: { status: ProviderStatus.PENDING },
     }),
     prisma.order.aggregate({
       where: {
