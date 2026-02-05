@@ -21,6 +21,19 @@ const getAllProvidersFromDB = async () => {
   return result;
 };
 
+const getAllApprovedProvidersFromDB = async () => {
+  const result = await prisma.providerProfile.findMany({
+    where: {
+      status: ProviderStatus.APPROVED,
+    },
+    include: {
+      user: true,
+      meals: true,
+    },
+  });
+  return result;
+};
+
 const getProviderByIdFromDB = async (id: string) => {
   const result = await prisma.providerProfile.findUnique({
     where: {
@@ -130,6 +143,7 @@ const getProviderDashboardStatsFromDB = async (userId: string) => {
 export const ProviderService = {
   createProviderProfileInDB,
   getAllProvidersFromDB,
+  getAllApprovedProvidersFromDB,
   getProviderByIdFromDB,
   getProviderByUserIdFromDB,
   updateProviderProfileInDB,
