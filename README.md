@@ -1,6 +1,7 @@
 # OrderEats Server 🍔
 
 A robust and scalable backend for the OrderEats food delivery platform. This server application manages users, providers, meals, orders, carts, reviews, promo codes, loyalty points, and payment processing, providing a seamless experience for customers, food providers, and administrators.
+A
 
 ## 🚀 Tech Stack
 

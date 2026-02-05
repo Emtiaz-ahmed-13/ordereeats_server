@@ -10,6 +10,9 @@ CREATE TYPE "DiscountType" AS ENUM ('PERCENTAGE', 'FIXED');
 -- CreateEnum
 CREATE TYPE "LoyaltyTier" AS ENUM ('BRONZE', 'SILVER', 'GOLD', 'PLATINUM');
 
+-- CreateEnum
+CREATE TYPE "ProviderStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
@@ -40,6 +43,11 @@ CREATE TABLE "provider_profiles" (
     "rating" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
     "deliveryFee" DOUBLE PRECISION NOT NULL,
     "deliveryTime" TEXT NOT NULL,
+    "image" TEXT,
+    "status" "ProviderStatus" NOT NULL DEFAULT 'PENDING',
+    "isOnboarded" BOOLEAN NOT NULL DEFAULT false,
+    "address" TEXT,
+    "phone" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

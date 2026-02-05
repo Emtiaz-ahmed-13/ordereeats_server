@@ -34,11 +34,22 @@ const auth = (...roles) => {
                 verifiedUser.userId = userId;
             }
             req.user = verifiedUser;
-            if (roles.length && !roles.includes(verifiedUser.role))
-                throw new ApiError_1.default(403, "Forbidden");
+            const userRoleSource = verifiedUser.role;
+            const userRole = userRoleSource === null || userRoleSource === void 0 ? void 0 : userRoleSource.toUpperCase();
+            const requiredRoles = roles.map(r => r.toUpperCase());
+            console.log('Auth Middleware Trace:', {
+                userId: verifiedUser.id,
+                originalRole: userRoleSource,
+                userRole,
+                requiredRoles
+            });
+            if (requiredRoles.length && !requiredRoles.includes(userRole)) {
+                throw new ApiError_1.default(403, `Forbidden: User role '${userRoleSource}' is not authorized for this resource. Required roles: ${roles.join(', ')}`);
+            }
             next();
         }
         catch (error) {
+            console.error('Auth Middleware Error:', error.message);
             next(error);
         }
     });

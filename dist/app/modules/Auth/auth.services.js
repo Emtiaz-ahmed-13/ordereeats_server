@@ -41,6 +41,15 @@ const register = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     if (existingUser) {
         throw new ApiError_1.default(400, "User with this email already exists");
     }
+    // Limit ADMIN accounts to 2
+    if (payload.role === client_1.UserRole.ADMIN) {
+        const adminCount = yield prisma_1.default.user.count({
+            where: { role: client_1.UserRole.ADMIN },
+        });
+        if (adminCount >= 2) {
+            throw new ApiError_1.default(400, "Maximum number of admin accounts (2) reached");
+        }
+    }
     const hashedPassword = yield bcrypt_1.default.hash(payload.password, 12);
     // Generate email verification token
     const emailVerificationToken = crypto_1.default.randomBytes(32).toString("hex");
